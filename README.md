@@ -64,6 +64,32 @@ But you can also run tests through Leiningen.
 lein test
 ```
 
+### Migrations
+
+Migrations are handled by [ragtime][]. Migration files are stored in
+the `resources/migrations` directory, and are applied in alphanumeric
+order.
+
+To update the database to the latest migration, open the REPL and run:
+
+```clojure
+dev=> (migrate)
+Applying 20150815144312-create-users
+Applying 20150815145033-create-posts
+```
+
+To rollback the last migration, run:
+
+```clojure
+dev=> (rollback)
+Rolling back 20150815145033-create-posts
+```
+
+Note that the system needs to be setup with `(init)` or `(go)` before
+migrations can be applied.
+
+[ragtime]: https://github.com/weavejester/ragtime
+
 ### Generators
 
 This project has several generator functions to help you create files.
@@ -84,6 +110,15 @@ To create a new component:
 dev=> (gen/component "baz")
 Creating file src/foo/component/baz.clj
 Creating file test/foo/component/baz_test.clj
+nil
+```
+
+To create a new SQL migration:
+
+```clojure
+dev=> (gen/sql-migration "create-users")
+Creating file resources/foo/migrations/20160519143643-create-users.up.sql
+Creating file resources/foo/migrations/20160519143643-create-users.down.sql
 nil
 ```
 

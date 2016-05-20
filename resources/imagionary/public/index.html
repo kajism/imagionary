@@ -20,8 +20,15 @@
       <dl>
         <dt>+example</dt>
         <dd>Adds an example endpoint at <a href="/example">/example</a>.</dd>
+        <dt>+ragtime</dt>
+        <dd>Adds Ragtime migrations. Use <code>(migrate)</code> and <code>(rollback)</code>
+          in the REPL. Migrations are stored in <code>resources/imagionary/migrations</code>.
+        </dd>
         <dt>+site</dt>
         <dd>Adds middleware and configuration suited for a user-facing website.</dd>
+        <dt>+sqlite</dt>
+        <dd>Adds a SQLite dependency and database component. The database used for
+          development defaults to <code>db/dev.sqlite</code>.</dd>
       </dl>
     </div>
     
