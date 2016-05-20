@@ -55,3 +55,4 @@ ALTER TABLE "imagionary-tag" ADD CONSTRAINT "fk-imagionary-tag-to-img"
   FOREIGN KEY ("imagionary-id") REFERENCES "imagionary" ("id");
 ALTER TABLE "imagionary-tag" ADD CONSTRAINT "fk-imagionary-tag-to-tag"
   FOREIGN KEY ("tag-id") REFERENCES "tag" ("id");
+ALTER TABLE "imagionary-tag" ADD CONSTRAINT "imagionary-tag-unique-tag" UNIQUE ("tag-id", "imagionary-id");

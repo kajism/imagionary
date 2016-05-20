@@ -31,3 +31,6 @@
 (gen/set-ns-prefix 'imagionary)
 
 (reloaded.repl/set-init! new-system)
+
+(defn db-spec []
+  (-> system :db :spec))
