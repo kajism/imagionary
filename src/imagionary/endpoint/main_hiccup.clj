@@ -18,22 +18,23 @@
          [:span.icon-bar]
          [:span.icon-bar]]
         [:a {:href "#"}
-         [:img {:src "/img/logo_background.jpg" :alt "LiškaSys" :height "60"}]]]
+         [:img {:src "/img/logo.jpg" :alt "Imagionary" :height "60"}]]]
        [:div#liskasys-navbar.collapse.navbar-collapse
         [:ul.nav.navbar-nav
-         (when (pos? (:-children-count user))
-           [:li
-            [:a {:href "/"} "Omluvenky"]])
-         (when (or ((:-roles user) "admin")
-                   ((:-roles user) "obedy"))
-           [:li
-            [:a {:href "/obedy"} "Obědy"]])]
+         [:li
+          [:a {:href "/kapitoly"} "Kapitoly"]]
+         (when ((:-roles user) "admin")
+           [:li.dropdown
+            [:a.dropdown-toggle {:data-toggle "dropdown" :href "#"}
+             "Admin" [:span.caret]]
+            [:ul.dropdown-menu
+             [:li
+              [:a {:href "/import"} "Import"]]
+             [:li
+              [:a {:href "/uzivatele"} "Uživatelé"]]]])]
         [:ul.nav.navbar-nav.navbar-right
          [:li
-          [:a {:href "/profile"} (:-fullname user)]]
-         (when ((:-roles user) "admin")
-           [:li
-            [:a {:target "admin" :href "/admin.app"} "Admin"]])
+          [:a {:href "/profile"} (:email user)]]
          [:li
           [:a {:href "/passwd"} "Změna hesla"]]
          [:li

@@ -33,7 +33,7 @@
                                                         :proxy true}
                                                  (:dev env)
                                                  (assoc :session {:store (cookie/cookie-store {:key "Imagionary--Salt"})})))
-         :aliases    {}}
+         :aliases    {"/" "/kapitoly"}}
    :ragtime {:resource-path "imagionary/migrations"}})
 
 (defn new-system [config]

@@ -19,7 +19,8 @@
                  [duct/ragtime-component "0.1.4"]
                  [secretary "1.2.3"]
                  [ring-middleware-format "0.7.0"]
-                 [crypto-password "0.2.0"]]
+                 [crypto-password "0.2.0"]
+                 [org.clojure/data.csv "0.1.3"]]
   :plugins [[lein-environ "1.0.3"]]
   :main ^:skip-aot imagionary.main
   :target-path "target/%s/"
