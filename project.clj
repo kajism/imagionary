@@ -11,6 +11,7 @@
                  [duct "0.6.1"]
                  [environ "1.0.3"]
                  [meta-merge "0.1.1"]
+                 [org.clojure/clojure "1.8.0"]
                  [ring-jetty-component "0.3.1"]
                  [org.slf4j/slf4j-nop "1.7.21"]
                  [duct/hikaricp-component "0.1.0"]
@@ -38,5 +39,6 @@
                                   [kerodon "0.7.0"]]
                    :source-paths ["dev"]
                    :repl-options {:init-ns user}
-                   :env {:port "3000"}}
+                   :env {:port "3000"
+                         :database-url "jdbc:h2:./imagionary.db"}}
    :project/test  {}})

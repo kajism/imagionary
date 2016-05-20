@@ -10,12 +10,10 @@
             [meta-merge.core :refer [meta-merge]]
             [ring.component.jetty :refer [jetty-server]]
             [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
-            [ring.middleware.webjars :refer [wrap-webjars]]
             [imagionary.endpoint.example :refer [example-endpoint]]))
 
 (def base-config
   {:app {:middleware [[wrap-not-found :not-found]
-                      [wrap-webjars]
                       [wrap-defaults :defaults]
                       [wrap-route-aliases :aliases]]
          :not-found  (io/resource "imagionary/errors/404.html")
