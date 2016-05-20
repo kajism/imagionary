@@ -7,10 +7,10 @@
             [duct.component.ragtime :refer [ragtime]]
             [duct.middleware.not-found :refer [wrap-not-found]]
             [duct.middleware.route-aliases :refer [wrap-route-aliases]]
+            [imagionary.endpoint.user :refer [user-endpoint]]
             [meta-merge.core :refer [meta-merge]]
             [ring.component.jetty :refer [jetty-server]]
-            [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
-            [imagionary.endpoint.example :refer [example-endpoint]]))
+            [ring.middleware.defaults :refer [site-defaults wrap-defaults]]))
 
 (def base-config
   {:app {:middleware [[wrap-not-found :not-found]
@@ -28,9 +28,9 @@
          :http (jetty-server (:http config))
          :db   (hikaricp (:db config))
          :ragtime (ragtime (:ragtime config))
-         :example (endpoint-component example-endpoint))
+         :user (endpoint-component user-endpoint))
         (component/system-using
          {:http [:app]
-          :app  [:example]
+          :app  [:user]
           :ragtime [:db]
-          :example [:db]}))))
+          :user [:db]}))))
