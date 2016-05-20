@@ -39,6 +39,7 @@
                                   [kerodon "0.7.0"]]
                    :source-paths ["dev"]
                    :repl-options {:init-ns user}
-                   :env {:port "3000"
+                   :env {:dev "true"
+                         :port "3000"
                          :database-url "jdbc:h2:./imagionary.db"}}
    :project/test  {}})
