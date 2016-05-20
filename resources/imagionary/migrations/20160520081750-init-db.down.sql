@@ -1,0 +1,6 @@
+DROP TABLE IF EXISTS "imagionary-tag";
+DROP TABLE IF EXISTS "imagionary";
+DROP TABLE IF EXISTS "user";
+DROP TABLE IF EXISTS "tag";
+DROP TABLE IF EXISTS "chapter";
+
