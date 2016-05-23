@@ -15,16 +15,78 @@
      (rest
       (csv/read-csv in-file)))))
 
+(defn- import-csv-file-to-db [db-spec csv-file]
+  (let [lines (->> (read-csv-lines csv-file)
+                   (filter (fn [[chapter-label]]
+                             (and (not (str/blank? chapter-label))
+                                  (not= "název kapitoly" (str/lower-case chapter-label))))))
+        chapter-label->id (atom (into {} (map (juxt :label :id)
+                                              (jdbc-common/select db-spec :chapter {}))))
+        tag-label->id (atom (into {} (map (juxt :label :id)
+                                          (jdbc-common/select db-spec :tag {}))))
+        chapter-img->id (into {} (map (juxt (juxt :chapter-id :img-filename)
+                                            :id)
+                                      (jdbc-common/select db-spec :imagionary {})))]
+    (doseq [[chapter-label word img-filename copyright explanation tags notes _ syllables :as line] lines
+            :when (and line chapter-label img-filename)
+            :let [tag-ids (->> (str/split tags #"\s*,\s*")
+                               (map #(or (get @tag-label->id %)
+                                         (let [new-id (jdbc-common/insert! db-spec :tag {:label %})]
+                                           (swap! tag-label->id assoc % new-id)
+                                           new-id)))
+                               set)
+                  chapter-id (or (get @chapter-label->id chapter-label)
+                                 (let [new-id (jdbc-common/insert! db-spec :chapter {:label chapter-label})]
+                                   (swap! chapter-label->id assoc chapter-label new-id)
+                                   new-id))
+                  id (get chapter-img->id [chapter-id img-filename])
+                  row (cond-> {:chapter-id chapter-id
+                               :word word
+                               :img-filename img-filename
+                               :copyright copyright
+                               :explanation explanation
+                               :notes notes}
+                        (not (str/blank? syllables))
+                        (assoc :syllables (Byte. syllables))
+                        id
+                        (assoc :id id))
+                  id (if id
+                       (jdbc-common/update! db-spec :imagionary row)
+                       (jdbc-common/insert! db-spec :imagionary row))]]
+      (jdbc-common/delete! db-spec :imagionary-tag {:imagionary-id id})
+      (doseq [tag-id tag-ids]
+        (jdbc-common/insert! db-spec :imagionary-tag {:imagionary-id id
+                                                      :tag-id tag-id})))))
+
+(defn- imagionary-item [row]
+  [:div
+   [:div [:b (:word row)]]
+   [:div (:explanation row)]
+   [:img {:src (str "/img/" (:img-filename row))}]
+   [:div (:copyright row)]])
+
 (defn main-endpoint [{{db-spec :spec} :db}]
   (context "" {{user :user} :session}
     (GET "/kapitoly" []
-      (main-hiccup/imagionary-frame
-       user
-       [:div.container
-        [:h3 "Kapitoly"]
-        [:ul
-         (for [chapter (jdbc-common/select db-spec :chapter {})]
-           [:li (:label chapter)])]]))
+      (let [chapters (jdbc-common/select db-spec :chapter {})]
+        (main-hiccup/imagionary-frame
+         user
+         [:div.container
+          [:h3 "Kapitoly"]
+          [:ul
+           (for [row chapters]
+             [:li [:a {:href (str "/kapitola/" (:id row))} (:label row)]])]])))
+
+    (GET "/kapitola/:id" [id]
+      (let [chapter (first (jdbc-common/select db-spec :chapter {:id id}))
+            imgs (jdbc-common/select db-spec :imagionary {:chapter-id id})]
+        (main-hiccup/imagionary-frame
+         user
+         [:div.container
+          [:h3 "Kapitola: " (:label chapter)]
+          [:ul
+           (for [row imgs]
+             [:li (imagionary-item row)])]])))
 
     (GET "/import" []
       (main-hiccup/imagionary-frame
@@ -38,48 +100,19 @@
          [:button.btn.btn-success {:type "submit"} "Importovat"]]]))
 
     (POST "/import" [csv-file]
-      (let [lines (->> (read-csv-lines csv-file)
-                       (filter (fn [[chapter-label]]
-                                 (and (not (str/blank? chapter-label))
-                                      (not= "název kapitoly" (str/lower-case chapter-label))))))
-            chapter-label->id (atom (into {} (map (juxt :label :id)
-                                                  (jdbc-common/select db-spec :chapter {}))))
-            tag-label->id (atom (into {} (map (juxt :label :id)
-                                              (jdbc-common/select db-spec :tag {}))))
-            word-chapter->id nil  #_(atom (into {} (map (juxt :label :id)
-                                                 (jdbc-common/select db-spec :tag {}))))]
-        (main-hiccup/imagionary-frame
-         user
-         [:div.container
-          [:h3 "Import slovníku z Excelu"]
-          [:ul
-           (for [[chapter-label word img-filename copyright explanation tags notes _ syllables :as line] (timbre/spy lines)
-                 :when (and (timbre/spy line) (timbre/spy chapter-label) (timbre/spy img-filename))
-                 :let [tags-id (->> (str/split tags #"\s*,\s*")
-                                    (map #(or (get @tag-label->id %)
-                                              (let [new-id (jdbc-common/insert! db-spec :tag {:label %})]
-                                                (swap! tag-label->id assoc % new-id)
-                                                new-id)))
-                                    set)
-                       chapter-id (or (get @chapter-label->id chapter-label)
-                                      (let [new-id (jdbc-common/insert! db-spec :chapter {:label chapter-label})]
-                                        (swap! chapter-label->id assoc chapter-label new-id)
-                                        new-id))
-                       item (cond-> {:chapter-id chapter-id
-                                     :word word
-                                     :img-filename img-filename
-                                     :copyright copyright
-                                     :explanation explanation
-                                     :notes notes}
-                              (not (str/blank? syllables))
-                              (assoc :syllables (Byte. syllables)))]]
-             [:li (pr-str item)])]])))
-
-    (GET "/uzivatele" []
+      (import-csv-file-to-db db-spec csv-file)
       (main-hiccup/imagionary-frame
        user
        [:div.container
-        [:h3 "Uživatelé"]
-        [:ul
-         (for [chapter (jdbc-common/select db-spec :user {})]
-           [:li (:email chapter)])]]))))
+        [:h3 "Import slovníku z Excelu"]
+        [:div "Hotovo"]]))
+
+    (GET "/uzivatele" []
+      (let [users (jdbc-common/select db-spec :user {})]
+        (main-hiccup/imagionary-frame
+         user
+         [:div.container
+          [:h3 "Uživatelé"]
+          [:ul
+           (for [row users]
+             [:li (:email row)])]])))))

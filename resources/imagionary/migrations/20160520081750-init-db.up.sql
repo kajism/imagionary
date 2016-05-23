@@ -43,7 +43,7 @@ CREATE TABLE "imagionary" (
 "created" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
 "modified" TIMESTAMP NOT NULL AS CURRENT_TIMESTAMP());
 
-ALTER TABLE "imagionary" ADD CONSTRAINT "imagionary-unique-chapter-word" UNIQUE ("chapter-id", "word");
+ALTER TABLE "imagionary" ADD CONSTRAINT "imagionary-unique-chapter-img" UNIQUE ("chapter-id", "img-filename");
 
 CREATE TABLE "imagionary-tag" (
 "id" BIGINT IDENTITY,
